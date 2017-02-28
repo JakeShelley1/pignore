@@ -14,7 +14,7 @@ def check_for_params(params, s):
     return False 
 
 # Show help docs
-def print_help(showFlair=False):
+def print_help():
     print("")
     print(" <`--'\> ____  __  ___  __ _   __  ____  ____") 
     print(" /. .  \(  _ \(  )/ __)(  ( \ /  \(  _ \(  __)")
@@ -26,21 +26,24 @@ def print_help(showFlair=False):
     print("   g | generate   generate a gitignore file")
     print("   u | update     update gitignore stored files")
     print("   s | save       save current directory gitignore file")
+    print("   l | list       list all available gitignores")
     print("\nUse 'pignore <command> -h' to get more detail")
     print("\nMost popular supported gitignores:")
     print("   python, java, swift, node, go, objective-c, c,")
     print("   erlang, lisp, laravel, xcode, ...\n")
-    print("Use 'pignore list' to see full support list\n")
 
 # Print detailed help for chosen command
 def print_detail_help(cmd):
     print("")
+    print("Usage:"),
     if (cmd == "update"):
-        print("Usage: pignore update (no args)")
+        print("pignore update (no args)")
     elif (cmd == "generate"):
-        print("Usage: pignore generate [<gitignore_name>]")
+        print("pignore generate [<gitignore_name>]")
     elif (cmd == "save"):
-        print("Usage: pignore save <new_gitignore_name> (can only contain characters A-z, 1-9)")
+        print("pignore save <new_gitignore_name> (can only contain characters A-z, 1-9)")
+    elif (cmd == "list"):
+        print("pignore list (no args)")
     print("")
 
 # Print version number
@@ -52,6 +55,45 @@ def throw_error(error):
     print("\nError: %s" % error)
     print("Use 'pignore --help' to learn more\n")
     exit(1)
+
+def print_file_list(files, ext_len):
+    if (len(files) == 0 ):
+        print("")
+        return
+    i = 0
+    count = 0
+    string = "   "
+    while i < len(files):
+        if (count == 7):
+            string += "\n   "
+            count = 0
+        if (i == len(files) - 1):
+            string += files[i][:-ext_len].lower()
+        else:
+            string += files[i][:-ext_len].lower() + ", "
+        count += 1
+        i += 1
+    print(string)
+    print("")
+
+# List all available gitignores
+def list_data():
+    default_files = []
+    user_files = []
+
+    for root, dirs, files in os.walk(data_path):
+        for f in files:
+            if (f.endswith(".user.gitignore")):
+                user_files.append(f)
+            else:
+                default_files.append(f)
+
+    print("Default Files (from https://github.com/github/gitignore):")
+    print_file_list(default_files, 10)
+    print("User files (create using 'pignore save <name>'):")
+    print_file_list(user_files, 15)
+
+    print("Be sure to 'pignore update' to get all the latest files!")
 
 # Parse options
 def parse_options(args):
@@ -240,6 +282,13 @@ def main():
             save(args[1]) # send all args after command
         else:
             throw_error("No name was provided! Use 'pignore save <name>'")
+        return
+
+    if (args[0] == "list" or args[0] == "l"):
+        if ("-h" in set(args)):
+            print_detail_help("list")
+            return
+        list_data()
         return
 
     # Check for help flag
