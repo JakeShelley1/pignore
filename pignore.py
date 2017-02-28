@@ -2,9 +2,6 @@ from urllib2 import urlopen, URLError, HTTPError
 import zipfile, StringIO
 import os, sys, shutil, re
 
-# Enhancement: Allow multiple args for merging gitignores
-# Enhancement: Save my own gitignore
-
 # Globals
 data_path = os.path.join(os.environ["HOME"], ".pignore-data/") # Where data files will be stored
 
@@ -31,21 +28,19 @@ def print_help(showFlair=False):
     print("   s | save       save current directory gitignore file")
     print("\nUse 'pignore <command> -h' to get more detail")
     print("\nMost popular supported gitignores:")
-    print("   python, swift, java, laravel, dart, javascript,")
-    print("   temp, temp, temp, temp, ...\n")
-    print("Use 'pignore list' to see full list\n")
+    print("   python, java, swift, node, go, objective-c, c,")
+    print("   erlang, lisp, laravel, xcode, ...\n")
+    print("Use 'pignore list' to see full support list\n")
 
 # Print detailed help for chosen command
 def print_detail_help(cmd):
     print("")
     if (cmd == "update"):
-        print("pignore update (no args)")
+        print("Usage: pignore update (no args)")
     elif (cmd == "generate"):
-        print("Usage:")
-        print("pignore generate [<gitignore_name>]")
+        print("Usage: pignore generate [<gitignore_name>]")
     elif (cmd == "save"):
-        print("Usage:")
-        print("pignore save <new_gitignore_name> (can only contain characters A-z, 1-9)")
+        print("Usage: pignore save <new_gitignore_name> (can only contain characters A-z, 1-9)")
     print("")
 
 # Print version number
@@ -86,7 +81,7 @@ def save(name):
         with open(os.path.join(data_path, name + ".user.gitignore"), "wb") as safe_file:
             gitignore = open(".gitignore")
             safe_file.write(gitignore.read())
-            gitignore.close
+            gitignore.close()
 
         print("Done")
         print("Saved file can be generated with 'pignore generate %s'" % name)
@@ -97,16 +92,28 @@ def save(name):
 def generate(params):
     # Check for .pignore-data file
     if (os.path.exists(data_path) == False):
-        throw_error("Could not find any data files! Use 'pignore update' to get latest gitignores\n")
+        throw_error("Could not find any data files! Use 'pignore update' to get latest gitignores")
 
     if (len(params) == 0):
         throw_error("No gitignore names given! Use 'pignore generate [<gitignore_name>]'")
 
+    file_names = []
+
     # Ensure that args are valid files
     for p in set(params):
-        p += ".gitignore"
-        if (os.path.exists(os.path.join(data_path, p)) == False):
-            throw_error("Could not find file '%s.gitignore'.\nUse 'pignore list' to see available gitignores\nUse 'pignore update' to get latest gitignore" % p[:-10])
+        # If user generated file exists, use that and continue
+        file_name = p + ".user.gitignore"
+        if (os.path.exists(os.path.join(data_path, file_name))):
+            file_names.append(file_name)
+            continue
+        
+        # If no user generated file exists, search for default file
+        file_name = p + ".gitignore"
+        if (os.path.exists(os.path.join(data_path, file_name))):
+            file_names.append(file_name)
+            continue
+
+        throw_error("Could not find file '%s.gitignore'\nUse 'pignore list' to see available gitignores\nUse 'pignore update' to get latest gitignore" % file_name[:-10])
 
     write_option = None
     
@@ -126,11 +133,11 @@ def generate(params):
         write_option = "wb"
         print("Writing gitignore..."),
 
-    for p in set(params):
-        p += ".gitignore"
+    for file_name in file_names:
         with open(".gitignore", write_option) as gitignore:
-            f = open(os.path.join(data_path, p))
+            f = open(os.path.join(data_path, file_name))
             gitignore.write(f.read())
+            f.close()
         write_option = "a" # Set write to append after first param
     print("Done")
 
