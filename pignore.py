@@ -73,23 +73,42 @@ def generate(params):
     if (os.path.exists(data_path) == False):
         throw_error("Couldn't find data file! Use 'pignore update' to get latest gitignores.\n")
 
-    # write_option = None
+    if (len(params) == 0):
+        throw_error("No gitignore names given! Use pignore generate [<gitignore_name>]")
+
+    # Ensure that args are valid files
+    for p in set(params):
+        p += ".gitignore"
+        if (os.path.exists(os.path.join(data_path, p)) == False):
+            throw_error("%s is not a valid gitignore file! Use pignore list to see supported gitignores." % p[:-10])
+
+    write_option = None
     
-    # # Check for existing gitignore and set write option
-    # if (os.path.isfile(".gitignore")):
-    #     while (write_option == None):
-    #         overwrite = raw_input("Found existing gitignore file. Overwrite (y/n)? ")
-    #         if (overwrite == "y"):
-    #             write_option = "wb"
-    #             print("Overwriting existing gitignore..."),
-    #         elif (overwrite == "n"):
-    #             write_option = "a"
-    #             print("Appending to existing gitignore..."),
-    #         else:
-    #             print("Your response %s was not one of the expected responses: y, n" % overwrite)
-    # else:
-    #     write_option = "wb"
-    #     print("Writing gitignore..."),
+    # Check for existing gitignore and set write option
+    if (os.path.isfile(".gitignore")):
+        while (write_option == None):
+            overwrite = raw_input("Found existing gitignore file. Overwrite (y/n)? ")
+            if (overwrite == "y"):
+                write_option = "wb"
+                print("Overwriting existing gitignore..."),
+            elif (overwrite == "n"):
+                write_option = "a"
+                print("Appending to existing gitignore..."),
+            else:
+                print("Your response %s was not one of the expected responses: y, n" % overwrite)
+    else:
+        write_option = "wb"
+        print("Writing gitignore...")
+
+    for p in set(params):
+        p += ".gitignore"
+        with open(".gitignore", write_option) as gitignore:
+            f = open(os.path.join(data_path, p))
+            gitignore.write(f.read())
+        write_option = "a" # Set write to append after first param
+    print("Done")
+
+
 
 # Setup .pignore-data folder
 def setup_folder():
@@ -173,19 +192,18 @@ def main():
         update_data()
         return
 
-    # Check for genenrate
-    if (arg[0] == "generate" or arg[0] == "g"):
+    # Check for generate
+    if (args[0] == "generate" or args[0] == "g"):
         if ("-h" in set(args)):
             print_detail_help("generate")
             return
-        generate()
+        generate(args[1:]) # send all args after command
         return
 
     # Check for help flag
     if (check_for_params(["--help", "-h"], args)):
         print_help()
         return
-    generate()
 
     # Incorrect usage
     print_help()
