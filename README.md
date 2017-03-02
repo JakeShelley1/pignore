@@ -4,7 +4,7 @@ Gitignore generator written in Python.
 ![](http://i.imgur.com/QmNzbhs.gif)
 
 ## Features
-- Easy to [install](https://github.com/jakeshelley1/pignore#installion)
+- Easy to [install](https://github.com/jakeshelley1/pignore#installation)
 - Supports tons of [gitignore files](https://github.com/github/gitignore) by default
 - [Save gitignores](https://github.com/jakeshelley1/pignore#usage) for later use
 - Works anywhere you can use pip or easy_install
