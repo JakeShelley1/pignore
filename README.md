@@ -11,6 +11,11 @@ Gitignore generator written in Python.
 
 ## Installation
 `pip install pignore`
+
+OR
+
+`easy_install pignore`
+
 Run `pignore update` after installation to get default gitignores
 ## Usage
 ### Commands

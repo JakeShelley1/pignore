@@ -48,7 +48,7 @@ def print_detail_help(cmd):
 
 # Print version number
 def print_version():
-    print("1.0")
+    print("0.1.1")
 
 # Print error, exit on completion
 def throw_error(error):

@@ -1,3 +1,4 @@
 pignore.egg-info
 *.pyc
 .DS_Store
+MANIFEST
